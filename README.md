@@ -55,3 +55,6 @@ pnpm add @testing-library/react
 pnpm add msw
 
 pnpm i --save-dev @types/jest
+
+<!-- Supabase -->
+npm install @supabase/supabase-js

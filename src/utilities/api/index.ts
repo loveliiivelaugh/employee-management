@@ -1,5 +1,6 @@
 import axios from "axios";
 import apiConfig from "./api.config.json";
+import { supabase } from "./supabase";
 
 const client = axios.create(apiConfig.host);
 const graphqlClient = axios.create(apiConfig.host);
@@ -14,6 +15,11 @@ type PayloadTypes = {
         }
         [propertyKey: string]: any
     }
+};
+
+type SupabaseQueryOptions = {
+    table: string;
+    select?: string;
 };
 
 type DebounceType = (...args: any) => any;
@@ -33,6 +39,10 @@ const queries = ({
         queryFn: async () => payload 
             ? (await (client as any)[method || "post"](queryPath, payload)).data
             : (await (client as any)[method || "get"](queryPath)).data
+    }),
+    supabaseQuery: (options: SupabaseQueryOptions) => ({
+        queryKey: [`supabase-${options.table}-${options.select}`],
+        queryFn: async () => await supabase.from(options.table).select(options?.select ? options.select : "*")
     }),
     mutate: (queryPath: string) => ({
         mutationKey: [queryPath],

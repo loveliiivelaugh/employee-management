@@ -3,26 +3,38 @@ import Table from "@custom/charts/ReusableTable";
 import Calendar from "@custom/Calendar/Calendar";
 import FormContainer from '@custom/forms/FormContainer';
 import useUtilityStore, { type UtilityStoreType } from '@store/utilityStore';
+import { useQuery } from '@tanstack/react-query';
+import { queries } from '@api/index';
+import React from 'react';
 
+const getEmployeesData = (employeesQuery: any, isRows = false) => employeesQuery.isLoading
+    ? []
+    : isRows
+        ? employeesQuery?.data?.data && employeesQuery.data.data || []
+        : employeesQuery?.data?.data && Object
+            .keys(employeesQuery.data.data[0])
+            .map((columnKey) => ({ 
+                name: columnKey, 
+                dataType: "text" 
+            }));
 
-const buildOperateButtons = ({ utilityStore }: { utilityStore: UtilityStoreType }) => [
+const ContentContainer = ({ children }: { children: React.ReactNode }) => (
+    <Box sx={{ maxHeight: 600, overflow: "auto" }}>
+        {children}
+    </Box>
+);
+const buildOperateButtons = ({ utilityStore, columns }: { utilityStore: UtilityStoreType, columns: any }) => [
     {
         label: "add",
         onClick: () => utilityStore.setModal({
             open: true,
             content: (
-                <FormContainer
-                    schema={{
-                        table: "employees",
-                        columns: [
-                            { name: "firstname", dataType: "text" },
-                            { name: "lastname", dataType: "text" },
-                            { name: "pay", dataType: "text" },
-                            { name: "role", dataType: "text" },
-                        ]
-                    }}
-                    handleCancelClick={() => utilityStore.setModal({ open: false, content: null })}
-                />
+                <ContentContainer>
+                    <FormContainer
+                        schema={{ table: "employees", columns }}
+                        handleCancelClick={() => utilityStore.setModal({ open: false, content: null })}
+                    />
+                </ContentContainer>
             )
         })
     },
@@ -31,18 +43,12 @@ const buildOperateButtons = ({ utilityStore }: { utilityStore: UtilityStoreType 
         onClick: () => utilityStore.setModal({
             open: true,
             content: (
-                <FormContainer
-                    schema={{
-                        table: "employees",
-                        columns: [
-                            { name: "firstname", dataType: "text" },
-                            { name: "lastname", dataType: "text" },
-                            { name: "pay", dataType: "text" },
-                            { name: "role", dataType: "text" },
-                        ]
-                    }}
-                    handleCancelClick={() => utilityStore.setModal({ open: false, content: null })}
-                />
+                <ContentContainer>
+                    <FormContainer
+                        schema={{ table: "employees", columns }}
+                        handleCancelClick={() => utilityStore.setModal({ open: false, content: null })}
+                    />
+                </ContentContainer>
             )
         })
     },
@@ -62,30 +68,44 @@ const buildOperateButtons = ({ utilityStore }: { utilityStore: UtilityStoreType 
     }
 ];
 
+const queryOptions = {
+    employees: {
+        table: "employees",
+        select: "*"
+    },
+    appointments: {
+        table: "appointments",
+        select: "*"
+    }
+};
+
 export default function Dashboard() {
+    const employeesQuery = useQuery(queries.supabaseQuery(queryOptions.employees));
+    const appointmentsQuery = useQuery(queries.supabaseQuery(queryOptions.appointments));
     const utilityStore = useUtilityStore();
+    console.log("employeesQuery: ", employeesQuery);
     return (
-        <Grid container spacing={2} p={2} mt={10}>
+        <Grid container spacing={2} p={2} mt={10} maxWidth={"100vw"}>
             <Grid size={12}>
                 <Box sx={{ display: "flex", justifyContent: "end", px: 2}}>
-                    {buildOperateButtons({utilityStore})
-                        .map((button, index) => (
-                            <Button
-                                key={index}
-                                color="inherit"
-                                onClick={button.onClick}
-                            >
-                                {button.label}
-                            </Button>
-                        ))
-                    }
+                    {buildOperateButtons({
+                        utilityStore, 
+                        columns: getEmployeesData(employeesQuery)
+                    })
+                    .map((button, index) => (
+                        <Button
+                            key={index}
+                            color="inherit"
+                            onClick={button.onClick}
+                        >
+                            {button.label}
+                        </Button>
+                    ))}
                 </Box>
                 <Table
                     title={"Employees"}
-                    rows={[]}
-                    columns={[
-                        { headerName: "Name" }
-                    ]}
+                    rows={getEmployeesData(employeesQuery, true)}
+                    columns={getEmployeesData(employeesQuery)}
                 />
             </Grid>
             <Grid size={12}>
