@@ -1,85 +1,53 @@
-import { useCallback, useState } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
+import type { Dispatch, SetStateAction } from 'react';
+import type { View, SlotInfo } from 'react-big-calendar';
+import { Calendar, Views, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
-import useUtilityStore from '@store/utilityStore';
-import { Button } from '@mui/material';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
-
-// Event {
-//     title: string,
-//     start: Date,
-//     end: Date,
-//     allDay?: boolean
-//     resource?: any,
-//   }
-
-// const eventsList = [
-//     {
-//         title: "238 Steps",
-//         start: new Date(),
-//         end: new Date()
-//     },
-//     {
-//         title: "6:42 Hours Slept",
-//         start: new Date(),
-//         end: new Date()
-//     }
-// ]
-
-const localizer = momentLocalizer(moment)
-
-const MyCalendar = () => {
-    const utilityStore = useUtilityStore();
-    const [events, setEvents] = useState([]);
-    const handleSelectSlot = useCallback(
-        ({ start, end }: any) => utilityStore.setModal({
-            open: true,
-            // const title = window.prompt('New Event name')
-            // if (title) {
-            //     setEvents((prev) => [...prev, { start, end, title }])
-            // }
-            content: (
-                <>
-                    Confirm Date {moment(start).format("M/D/YYYY")} ?
-                    And at what time?
-                    <TimePicker onChange={(event) => console.log("timechanged: ", event)} />
-                    <Button onClick={() => utilityStore.setModal({ open: false })}>
-                        Confirm
-                    </Button>
-                </>
-            )
-        }),
-        [setEvents]
-    )
-
-    const handleSelectEvent = useCallback(
-        (event: any) => window.alert(event.title),
-        []
-    )
-    return (
-        <div style={{ width: "100%" }}>
-            <Calendar
-                localizer={localizer}
-                events={events}
-                startAccessor="start"
-                endAccessor="end"
-                onSelectEvent={handleSelectEvent}
-                onSelectSlot={handleSelectSlot}
-                selectable
-                // scrollToTime={scrollToTime}
-                style={{
-                    height: 500,
-                    // display: "flex", 
-                    // justifyContent: "center", 
-                    width: "100%",
-                    color: "inherit"
-                }}
-            />
-        </div>
-    )
+interface CalendarEvent {
+    title: string;
+    start: Date;
+    end: Date;
+    allDay?: boolean;
+    resource?: any;
 };
 
-export default MyCalendar
+interface CalendarPropsType {
+    events?: CalendarEvent[] | undefined | null;
+    view: View;
+    date?: Date;
+    setCalendar: (calendar: any) => void;
+    handleSelectEvent?: (event: CalendarEvent) => void;
+    handleSelectSlot: (slot: SlotInfo) => void;
+};
+
+const localizer = momentLocalizer(moment);
+const scrollToTime = new Date();
+scrollToTime.setHours(16);
+
+const ReusableCalendar: React.FC<CalendarPropsType> = (props) => (
+    <div style={{ width: "100%" }}>
+        <Calendar
+            localizer={localizer}
+            events={props.events ?? []}
+            view={props.view}
+            date={props.date}
+            onView={(view: View) => props.setCalendar((old: any) => ({ ...old, view }))}
+            defaultView={Views.MONTH}
+            startAccessor="start"
+            endAccessor="end"
+            onSelectEvent={props.handleSelectEvent}
+            onSelectSlot={props.handleSelectSlot}
+            selectable
+            scrollToTime={scrollToTime}
+            style={{
+                height: 500,
+                width: "100%",
+                color: "inherit"
+            }}
+        />
+    </div>
+);
+
+export default ReusableCalendar;
+export type { CalendarEvent, View };

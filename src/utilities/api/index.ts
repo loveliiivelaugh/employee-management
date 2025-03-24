@@ -20,6 +20,7 @@ type PayloadTypes = {
 type SupabaseQueryOptions = {
     table: string;
     select?: string;
+    operate?: string;
 };
 
 type DebounceType = (...args: any) => any;
@@ -40,15 +41,31 @@ const queries = ({
             ? (await (client as any)[method || "post"](queryPath, payload)).data
             : (await (client as any)[method || "get"](queryPath)).data
     }),
-    supabaseQuery: (options: SupabaseQueryOptions) => ({
-        queryKey: [`supabase-${options.table}-${options.select}`],
-        queryFn: async () => await supabase.from(options.table).select(options?.select ? options.select : "*")
-    }),
     mutate: (queryPath: string) => ({
         mutationKey: [queryPath],
         mutationFn: async (payload?: PayloadTypes["MutatePayload"]) => payload?.options?.debounce
             ? (await debounce(client.post(queryPath, payload), payload.options.debounce)).data
             : (await client.post(queryPath, payload)).data
+    }),
+
+    supabaseQuery: (options: SupabaseQueryOptions) => ({
+        queryKey: [`supabase-${options.table}-${options.select}`],
+        queryFn: async () => await supabase.from(options.table).select(options?.select ? options.select : "*")
+    }),
+    supabaseMutation: (options: SupabaseQueryOptions) => ({
+        mutationKey: [`supabase-mutate-${options.table}`],
+        mutationFn: async (payload: any) => {
+            const table = payload?.table;
+            const operation = payload?.operation;
+
+            if (payload?.table) delete payload.table;
+            if (payload?.operation) delete payload.operation;
+
+            // @ts-ignore
+            return await supabase
+                .from(table || options.table)[operation || "insert"](payload)
+                .select();
+        }
     }),
     /**
      * Queries the GraphQL API

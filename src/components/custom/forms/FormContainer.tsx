@@ -122,6 +122,7 @@ interface Column {
     name: string;
     dataType?: string;
     notNull?: boolean;
+    enumValues?: any[];
 }
 
 interface Schema {
@@ -136,6 +137,7 @@ interface Validators {
 interface FormContainerProps {
     schema: Schema;
     excludedColumns?: string[];
+    disableHeader?: boolean;
     handleSubmit?: (values: Record<string, any>) => void;
     handleCancelClick?: () => void;
     mapDefaultValue?: (column: Column, extras: Record<string, any>) => any;
@@ -148,7 +150,7 @@ interface FormContainerProps {
 //     mapDefaultValues?: PropTypes.func
 //     handleCancelClick?: PropTypes.func 
 // }
-const FormContainer = ({ schema, ...props }: FormContainerProps) => {
+const FormContainer = ({ schema, disableHeader = false, ...props }: FormContainerProps) => {
     const utilityStore = useUtilityStore(); // utility states
 
     const fieldsArray = schema.columns
@@ -172,8 +174,8 @@ const FormContainer = ({ schema, ...props }: FormContainerProps) => {
 
         if (props?.handleSubmit) props.handleSubmit(values);
         
-        if (response.error) utilityStore.createAlert("error", `Something went wrong. Record not saved, ${(response.error as any).message}`);
-        else utilityStore.createAlert("success", `${schema.table} record saved.`);
+        // if (response.error) utilityStore.createAlert("error", `Something went wrong. Record not saved, ${(response.error as any).message}`);
+        // else utilityStore.createAlert("success", `${schema.table} record saved.`);
 
     };
 
@@ -211,11 +213,13 @@ const FormContainer = ({ schema, ...props }: FormContainerProps) => {
     return (
         <Grid container component={(form as any).Form} p={2} rowSpacing={2}>
 
-            <Grid size={12}>
-                <Typography variant="h5">
-                    Log {schema.table}
-                </Typography>
-            </Grid>
+            {!disableHeader && (
+                <Grid size={12}>
+                    <Typography variant="h5">
+                        Log {schema.table}
+                    </Typography>
+                </Grid>
+            )}
             <LocalizationProvider dateAdapter={AdapterMoment}>
             {buildFields(fieldsArray, form)
                 .map((Field: any) => Field?.props?.name ? (

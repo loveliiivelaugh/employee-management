@@ -44,7 +44,7 @@ export const useFuse = (props?: FuseHookPropsType) => {
     useEffect(() => {
         const fuse = new Fuse(list, fuseOptions);
         setInitializedFuze(fuse);
-    }, [props]);
+    }, [list]);
 
     const searchList = (
         searchPattern: string, 
