@@ -16,9 +16,9 @@ interface CalendarPropsType {
     events?: CalendarEvent[] | undefined | null;
     view: View;
     date?: Date;
-    setCalendar: (calendar: any) => void;
+    setCalendar?: (calendar: any) => void;
     handleSelectEvent?: (event: CalendarEvent) => void;
-    handleSelectSlot: (slot: SlotInfo) => void;
+    handleSelectSlot?: (slot: SlotInfo) => void;
 };
 
 const localizer = momentLocalizer(moment);
@@ -32,7 +32,7 @@ const ReusableCalendar: React.FC<CalendarPropsType> = (props) => (
             events={props.events ?? []}
             view={props.view}
             date={props.date}
-            onView={(view: View) => props.setCalendar((old: any) => ({ ...old, view }))}
+            onView={(view: View) => props?.setCalendar ? props.setCalendar((old: any) => ({ ...old, view })) : view}
             defaultView={Views.MONTH}
             startAccessor="start"
             endAccessor="end"
@@ -41,8 +41,8 @@ const ReusableCalendar: React.FC<CalendarPropsType> = (props) => (
             selectable
             scrollToTime={scrollToTime}
             style={{
-                height: 500,
-                width: "100%",
+                height: "70vh",
+                width: "98vw",
                 color: "inherit"
             }}
         />

@@ -2,6 +2,11 @@ import axios from "axios";
 import apiConfig from "./api.config.json";
 import { supabase } from "./supabase";
 
+// creds
+const isDev = (import.meta.env.MODE === "development");
+apiConfig.host.baseURL = isDev ? "http://localhost:5051" : import.meta.env.VITE_HOSTNAME;
+apiConfig.host.headers.Authorization = "Bearer " + import.meta.env.VITE_MASTER_API_KEY;
+
 const client = axios.create(apiConfig.host);
 const graphqlClient = axios.create(apiConfig.host);
 
@@ -26,6 +31,10 @@ type SupabaseQueryOptions = {
 type DebounceType = (...args: any) => any;
 const debounce: DebounceType = (fn, ms) => setTimeout(() => fn(), ms);
 
+const queryPathCallback: (queryPath: any) => string = (queryPath: any) => {
+    if (typeof queryPath === "function") return queryPath(apiConfig.paths);
+    return queryPath;
+};
 // general app queries
 const queries = ({
     /**
@@ -35,17 +44,17 @@ const queries = ({
      * @param {string} [method] HTTP method to use, defaults to "get"
      * @returns {import("react-query").UseQueryOptions} An object suitable for use with the `useQuery` hook
      */
-    query: (queryPath: string, payload?: PayloadTypes["QueryPayload"], method?: string) => ({
+    query: (queryPath: any, payload?: PayloadTypes["QueryPayload"], method?: string) => ({
         queryKey: [queryPath],
         queryFn: async () => payload 
-            ? (await (client as any)[method || "post"](queryPath, payload)).data
-            : (await (client as any)[method || "get"](queryPath)).data
+            ? (await (client as any)[method || "post"](queryPathCallback(queryPath), payload)).data
+            : (await (client as any)[method || "get"](queryPathCallback(queryPath))).data
     }),
-    mutate: (queryPath: string) => ({
+    mutate: (queryPath: any) => ({
         mutationKey: [queryPath],
         mutationFn: async (payload?: PayloadTypes["MutatePayload"]) => payload?.options?.debounce
-            ? (await debounce(client.post(queryPath, payload), payload.options.debounce)).data
-            : (await client.post(queryPath, payload)).data
+            ? (await debounce(client.post(queryPathCallback(queryPath), payload), payload.options.debounce)).data
+            : (await client.post(queryPathCallback(queryPath), payload)).data
     }),
 
     supabaseQuery: (options: SupabaseQueryOptions) => ({

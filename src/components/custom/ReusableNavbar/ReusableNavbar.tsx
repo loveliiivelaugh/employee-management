@@ -1,3 +1,4 @@
+import React from 'react';
 import { useLocation, useNavigate } from "react-router";
 import {
     AppBar, Avatar, Box, Button, ListItemText,
@@ -6,8 +7,9 @@ import {
 } from '@mui/material';
 import { appRoutes } from "@custom/routes/Router";
 import useUtilityStore from "@store/utilityStore";
+import { useSupabaseStore } from "@store/supabaseStore";
 
-const ButtonWrapper = (props: any) => <Button variant="contained" {...props} />;
+const ButtonWrapper = (props: any) => <Button variant="outlined" {...props} />;
 
 type NavItemsType = {
     label: string;
@@ -36,6 +38,7 @@ type NavbarPropsType = {
 
 export const Navbar = (props: NavbarPropsType) => {
     const utilityStore = useUtilityStore();
+    const supabaseStore = useSupabaseStore();
     const navigate = useNavigate();
     const location = useLocation();
     const navItems = assignNavItemsByType(props.navItems);
@@ -67,7 +70,7 @@ export const Navbar = (props: NavbarPropsType) => {
                     <ListItemText 
                         primary={
                             <Typography color="inherit" variant="h6" component="h6">
-                                Employee Management
+                                ScheduleTime
                             </Typography>
                         }
                         secondary={"your company"}
@@ -75,21 +78,24 @@ export const Navbar = (props: NavbarPropsType) => {
                 </ListItem>
 
                 <Box sx={{ display: "flex", width: "100%" }}>
-                    {navItems.map((listItem: NavItemsType, index: number) => listItem?.show && listItem.show({ location }) 
+                    {navItems.map((listItem: NavItemsType, index: number) => !listItem?.show || (listItem?.show && listItem.show({ location, supabaseStore }))
                         ? (
-                            <ListItemText 
+                            <ListItemButton
                                 key={index}
-                                // @ts-expect-error
-                                component={(index > 2) ? ButtonWrapper : ListItemButton} 
-                                primary={listItem.label}
+                                // // @ts-expect-error
+                                // primary={(index > 2) 
+                                //     ? <ButtonWrapper></ButtonWrapper>
+                                //     : <ListItemButton></ListItemButton>
+                                // } 
+                                children={listItem.label}
                                 onClick={
                                     (listItem?.path && !listItem.path.includes(":"))
                                         ? () => listItem.path && navigate(listItem.path)
-                                        : () => listItem.onClick && listItem.onClick({ navigate, utilityStore })
+                                        : () => listItem.onClick && listItem.onClick({ navigate, utilityStore, supabaseStore })
                                 }
                             />
                         )
-                    : (<></>))}
+                    : null)}
                 </Box>
             </Toolbar>
         </AppBar>

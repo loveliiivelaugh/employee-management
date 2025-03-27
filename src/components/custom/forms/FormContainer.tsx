@@ -69,11 +69,9 @@ const buildFields: any = (fieldsArray: any[], formState: any) => fieldsArray
             Select: {
                 ...commonProperties,
                 options: (field?.enumValues || []),
-                SelectProps: {
-                    native: true,
-                },
-                // value: formState.state.values[field.name],
+                SelectProps: { native: true },
                 defaultValue: formState.state.values[field.name],
+                value: formState.state.values[field.name]
             },
             Date: {
                 ...commonProperties,

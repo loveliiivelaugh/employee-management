@@ -26,7 +26,7 @@ interface SupabaseStore {
     setSession: (session: SupabaseSession | null) => void;
 }
 
-const useSupabaseStore = create < SupabaseStore > ((set) => ({
+const useSupabaseStore = create <SupabaseStore>((set) => ({
     // states
     session: null,
     userType: null,

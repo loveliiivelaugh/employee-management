@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 // import { useNavigate } from "react-router";
 import { useFuse } from '@helpers/fuse';
-import { Autocomplete, Avatar, Box, TextField, Typography } from '@mui/material';
+import { Autocomplete, Avatar, Box, InputAdornment, Button, TextField, Typography } from '@mui/material';
 // import { postsData } from "./postsData";
 
 const fuseOptions = {
@@ -17,7 +17,7 @@ export default function PostSearch({
 }: any) {
     console.log("PAOSTSEARCH/LOST: ", searchData)
     // const navigate = useNavigate();
-    const { fuse, searchList } = useFuse({ list: searchData, fuseOptions });
+    const { fuse } = useFuse({ list: searchData, fuseOptions });
 
     const [input, setInput] = useState("");
 
@@ -29,9 +29,6 @@ export default function PostSearch({
     useEffect(() => {
         filteredPosts = !selected ? []: [selected];
     }, [selected]);
-    // useEffect(() => {
-    //     if (searchList.length) fuse.setList(searchList, fuseOptions)
-    // }, [searchList]);
 
     return (
         <Autocomplete
@@ -39,8 +36,24 @@ export default function PostSearch({
             options={filteredPosts}
             getOptionLabel={(option: any) => option.first_name}
             onInputChange={(_, value) => setInput(value)}
+            clearIcon={(
+                <InputAdornment position="end">
+                    <Button color="error" onClick={() => {
+                            setSelected(null);
+                            setInput('');
+                        }}
+                    >
+                        Clear
+                    </Button>
+                </InputAdornment>
+            )}
             renderInput={(params) => (
-                <TextField {...params} label="Search Instructors" variant="outlined" fullWidth />
+                <TextField 
+                    {...params} 
+                    label="Search Instructors"
+                    variant="outlined"
+                    fullWidth
+                />
             )}
             renderOption={(props, option) => (
                 <Box

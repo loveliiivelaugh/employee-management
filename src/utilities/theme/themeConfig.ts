@@ -67,7 +67,7 @@ const themeConfig = {
                 // Same as in light but we could
                 // adjust color hue if needed
                 // main: colors.indigo["500"],
-                main: "#333",
+                main: "#111",
             },
             secondary: {
                 main: colors.grey["100"],
