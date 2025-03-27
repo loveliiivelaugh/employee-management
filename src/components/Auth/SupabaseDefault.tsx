@@ -33,17 +33,17 @@ export default function App() {
                         {
                             label: "Admin",
                             user: "admin@schedme.io",
-                            pass: "admin"
+                            pass: import.meta.env.VITE_ADMIN_PASS
                         },
                         {
                             label: "Staff",
                             user: "staff@schedme.io",
-                            pass: "staff"
+                            pass: import.meta.env.VITE_STAFF_PASS
                         },
                         {
                             label: "Guest",
                             user: "guest@schedme.io",
-                            pass: "guest"
+                            pass: import.meta.env.VITE_GUEST_PASS
                         }
                     ].map((defaultCreds, index) => (
                         <Button 
